@@ -4,6 +4,9 @@ volumes:
 
 x-airflow-common:
   &airflow-common
+  build:
+    context: .
+    dockerfile: Dockerfile.custom
   image: airflow-teemeo:2.8.1
   environment: &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor

@@ -314,7 +314,7 @@ dag = DAG(
 ### 1. Cloner le dépôt
 
 ```bash
-git clone https://github.com/votre-username/teemeo-billing-etl-airflow.git
+git clone https://github.com/JoeDalton318/teemeo-billing-etl-airflow.git
 cd teemeo-billing-etl-airflow
 ```
 
@@ -359,12 +359,14 @@ Cela crée 6 fichiers dans `data/` :
 ### 4. Démarrer l'environnement
 
 ```bash
-# Démarrer tous les conteneurs
+# Démarrer tous les conteneurs (la première fois, Docker va construire l'image Airflow personnalisée, ça prend 2-3 minutes)
 docker compose up -d
 
 # Vérifier que tous les services sont UP
 docker compose ps
 ```
+
+> **Note** : Au premier lancement, Docker Compose va automatiquement construire l'image `airflow-teemeo:2.8.1` depuis le `Dockerfile.custom`. Cela installe toutes les dépendances Python (pandas, scikit-learn, boto3, etc.). Cette étape prend environ 2-3 minutes. Les lancements suivants seront instantanés car l'image sera en cache.
 
 ### 5. Accéder aux interfaces
 
