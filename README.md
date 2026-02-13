@@ -682,6 +682,192 @@ LIMIT 50;
 
 ---
 
+## Troubleshooting
+
+### Erreurs rencontrées et résolues
+
+#### 1. Erreur PostgreSQL - Contrainte CHECK (load_to_staging)
+
+**Symptôme** : `psycopg2.errors.CheckViolation: new row violates check constraint "chk_dates_coherentes"`
+
+**Cause** : Certaines factures avaient `date_paiement < date_facturation` (paiement avant facturation)
+
+**Solution** : Filtre pré-insertion dans `etl_tasks.py` (lignes 468-479) :
+```python
+# Filtrer les lignes avec dates incohérentes
+df_incoherent = df[
+    (df['date_paiement'].notnull()) & 
+    (df['date_paiement'] < df['date_facturation'])
+]
+if len(df_incoherent) > 0:
+    print(f"ATTENTION: {len(df_incoherent)} lignes exclues")
+    
+# Exclure ces lignes du DataFrame avant insertion
+df = df[~((df['date_paiement'].notnull()) & (df['date_paiement'] < df['date_facturation']))]
+```
+
+#### 2. Erreur SQLAlchemy 2.x - AttributeError: Connection.commit()
+
+**Symptôme** : `AttributeError: 'Connection' object has no attribute 'commit'` (build_dimensions)
+
+**Cause** : SQLAlchemy 2.x a supprimé la méthode `.commit()` de l'objet Connection
+
+**Solution** : Migration vers `engine.begin()` :
+```python
+# ❌ Ancien code (SQLAlchemy 1.x)
+with engine.connect() as conn:
+    conn.execute(sql)
+    conn.commit()  # Ne fonctionne plus en 2.x
+
+# ✅ Nouveau code (SQLAlchemy 2.x)
+with engine.begin() as conn:
+    conn.execute(sql)
+    # Commit automatique si succès, rollback si exception
+```
+
+**Fichiers modifiés** : `build_dimensions`, `build_fact_table`, `detect_anomalies`, `create_datamart_relance`
+
+### Container airflow-init-1
+
+**Question fréquente** : "Pourquoi airflow-init-1 n'est pas lancé ?"
+
+**Réponse** : C'est **NORMAL**. Ce container d'initialisation s'exécute une seule fois au premier démarrage pour :
+- Créer les tables Airflow
+- Initialiser le compte admin
+- Configurer les paramètres de base
+
+Une fois terminé, il s'arrête (exit code 0). Vous pouvez le supprimer : `docker rm airflow-init-1`
+
+---
+
+## Démo rapide devant recruteur
+
+### Préparation (5 minutes avant)
+
+```powershell
+# 1. Lancer tous les services
+cd F:\Projets\teemeo-billing-etl-airflow
+docker compose up -d
+
+# 2. Vérifier que tout est UP
+docker compose ps
+
+# 3. Ouvrir les interfaces
+Start-Process "http://localhost:8080"  # Airflow
+Start-Process "http://localhost:9080"  # Adminer
+Start-Process "http://localhost:9001"  # MinIO
+```
+
+### Déroulement de la démo (15-20 minutes)
+
+#### 1. Introduction (2 min)
+Expliquer le contexte : 5 établissements, formats hétérogènes, besoin de consolidation
+
+#### 2. Architecture (3 min)
+Montrer les schémas dans le README : Medallion (Bronze/Silver/Gold) + Schéma en étoile
+
+#### 3. Airflow UI (5 min)
+- Ouvrir http://localhost:8080
+- Montrer le DAG `teemeo_billing_pipeline` (9 tâches)
+- Graph View : Workflow complet
+- **Trigger manuel** : Cliquer sur Play
+- Montrer l'exécution en temps réel (~33 secondes)
+
+#### 4. Résultats dans Adminer (5 min)
+**Connexion** : Serveur=`postgres`, User=`teemeo_dw`, Pass=`teemeo_dw`, DB=`teemeo_dw`
+
+```sql
+-- Compter les factures
+SELECT COUNT(*) FROM dw.fact_facturation;
+
+-- Anomalies ML
+SELECT COUNT(*) FROM dw.fact_facturation WHERE anomaly_score = -1;
+
+-- CA par établissement
+SELECT e.nom_etablissement, SUM(f.montant_facture) as ca_total
+FROM dw.fact_facturation f
+JOIN dw.dim_etablissement e ON f.etablissement_key = e.etablissement_key
+GROUP BY e.nom_etablissement;
+
+-- Datamart relance
+SELECT priorite, COUNT(*), SUM(total_impaye)
+FROM datamart.relance
+GROUP BY priorite;
+```
+
+#### 5. MinIO Console (3 min)
+**Connexion** : `minioadmin` / `minioadmin123`
+- Naviguer dans les buckets `bronze` et `silver`
+- Montrer les fichiers sources et Parquet
+- Expliquer la compression (Parquet ~80% plus petit que CSV)
+
+#### 6. Questions techniques (5 min)
+Points à mentionner :
+- Gestion d'erreurs (2 bugs résolus)
+- ML (IsolationForest pour anomalies)
+- Scalabilité (cloud-ready pour AWS)
+
+---
+
+## FAQ / Points clés entretien
+
+### Architecture
+
+**Q : Pourquoi l'architecture Medallion ?**
+- **Bronze** : Immutabilité des sources (rejouabilité)
+- **Silver** : Optimisation (Parquet columnar)
+- **Gold** : Performance requêtes BI (schéma relationnel)
+
+**Q : Pourquoi schéma en étoile vs snowflake ?**
+- Plus simple (moins de jointures)
+- Plus performant pour analytics
+- Plus intuitif pour les métiers
+
+### Technologies
+
+**Q : Pourquoi Airflow ?**
+- Standard du marché
+- DAGs as code (Python)
+- Gestion robuste des erreurs (retry, alerting)
+- AWS MWAA pour migration cloud
+
+**Q : Pourquoi MinIO ?**
+- Compatible S3 (migration AWS triviale)
+- Gratuit et open-source
+- Performant pour Data Lake
+
+**Q : Pourquoi PostgreSQL ?**
+- ACID (intégrité des données)
+- Contraintes d'intégrité (CHECK, FK)
+- Vues matérialisées
+- Window functions
+
+### Machine Learning
+
+**Q : Expliquez IsolationForest**
+Algorithme d'**apprentissage non supervisé** qui isole les anomalies. Les points anormaux sont plus faciles à isoler que les points normaux. Score -1 = anomalie, 1 = normal.
+
+**Features** : montant_impayé, délai_paiement_jours, nombre_lignes  
+**Normalisation** : StandardScaler (moyenne=0, écart-type=1)  
+**Usage** : Prioriser les relances (anomalies = URGENT dans datamart)
+
+### Scalabilité
+
+**Q : Comment scaler ce projet ?**
+- **Airflow** : CeleryExecutor (workers distribués)
+- **PostgreSQL** : Partitionnement par date, Read Replicas
+- **Spark** : Remplacer Pandas par PySpark (millions de lignes)
+- **Cloud** : Migration vers AWS (S3 + MWAA + RDS/Redshift)
+
+### Data Quality
+
+**Q : Comment garantissez-vous la qualité ?**
+6 checks automatisés : valeurs manquantes, montants négatifs, dates futures, doublons, cohérences montants/dates.
+
+**Stratégie fail-fast** : Si 1 validation échoue, le pipeline s'arrête avant le chargement en base.
+
+---
+
 ## Contribution
 
 Les contributions sont les bienvenues ! Pour contribuer :
