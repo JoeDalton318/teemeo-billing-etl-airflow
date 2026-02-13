@@ -4,9 +4,6 @@ volumes:
 
 x-airflow-common:
   &airflow-common
-  build:
-    context: .
-    dockerfile: Dockerfile.custom
   image: airflow-teemeo:2.8.1
   environment: &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -25,8 +22,22 @@ x-airflow-common:
   depends_on:
     postgres:
       condition: service_healthy
+    airflow-image-builder:
+      condition: service_completed_successfully
 
 services:
+  # ===========================================================================
+  # Builder de l'image Airflow personnalisée (exécuté en premier)
+  # ===========================================================================
+  
+  airflow-image-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile.custom
+    image: airflow-teemeo:2.8.1
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["echo 'Image Airflow construite avec succès'"]
+
   # ===========================================================================
   # Base de données PostgreSQL (Airflow + Data Warehouse)
   # ===========================================================================
