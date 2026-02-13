@@ -1,0 +1,250 @@
+# ==============================================================================
+# Python
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.virtualenv/
+
+# ==============================================================================
+# Apache Airflow
+# ==============================================================================
+logs/
+airflow.db
+airflow.cfg
+airflow-webserver.pid
+standalone_admin_password.txt
+unittests.cfg
+webserver_config.py
+airflow-worker.pid
+*.pid
+
+# Airflow logs
+logs/**/*.log
+
+# ==============================================================================
+# Docker & Docker Compose
+# ==============================================================================
+# Docker volumes data
+vol/postgresql/data/
+minio-data/
+
+# Docker override files
+docker-compose.override.yml
+.dockerignore
+
+# ==============================================================================
+# Data files
+# ==============================================================================
+# Données brutes (ne pas commiter de vraies données)
+data/*.csv
+data/*.xlsx
+data/*.xls
+data/*.json
+data/*.jsonl
+data/raw/*.csv
+data/raw/*.xlsx
+data/raw/*.xls
+data/processed/
+data/bronze/
+data/silver/
+data/gold/
+
+# Fichiers Parquet et autres formats
+*.parquet
+*.avro
+*.orc
+
+# Garde les fichiers de test/exemple si nécessaire
+!data/sample_*
+!data/test_*
+
+# ==============================================================================
+# IDEs & Editors
+# ==============================================================================
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ==============================================================================
+# Jupyter Notebooks
+# ==============================================================================
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+*.ipynb
+
+# ==============================================================================
+# Environment Variables
+# ==============================================================================
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+.env.test
+
+# Garde le .env d'exemple pour référence
+!.env.example
+!.env.template
+
+# ==============================================================================
+# OS-specific
+# ==============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.directory
+
+# ==============================================================================
+# Database
+# ==============================================================================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# PostgreSQL
+*.dump
+*.sql.backup
+
+# ==============================================================================
+# Logs & Temporary files
+# ==============================================================================
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.cache
+.cache/
+
+# ==============================================================================
+# Testing
+# ==============================================================================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# ==============================================================================
+# MinIO / S3
+# ==============================================================================
+.minio/
+.minio.sys/
+
+# ==============================================================================
+# Machine Learning
+# ==============================================================================
+# Models
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.joblib
+*.model
+models/
+
+# Tensorboard
+runs/
+events.out.tfevents.*
+
+# ==============================================================================
+# Autres
+# ==============================================================================
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Secrets & credentials (IMPORTANT!)
+secrets/
+credentials/
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+.aws/
+.azure/
+gcp-credentials.json
+service-account.json
+
+# Backup files
+backup/
+backups/
+*.backup
+
