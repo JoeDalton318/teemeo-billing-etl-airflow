@@ -15,13 +15,11 @@
 
 ## ⚠️ Disclaimer / Avertissement
 
-**IMPORTANT** : Ce projet est un **exercice académique personnel** réalisé dans le cadre d'un Master 2 Développement, Big Data & Intelligence Artificielle. 
+**IMPORTANT** : Projet à but éducatif et de démonstration de compétences techniques.
 
-- Le terme **"Teemeo"** utilisé dans ce projet est **fictif** et ne fait référence à aucune entreprise réelle
-- Ce projet **n'a aucun lien** avec la société **KIWEE.Care** ni avec ses produits ou services
-- Il s'agit d'un **projet d'entraînement** visant à démontrer des compétences techniques en Data Engineering
-
-**Objectif** : Portfolio technique pour démonstration lors d'entretiens d'embauche dans le domaine du Data Engineering.
+- Le terme **"Teemeo"** utilisé dans ce projet est **entièrement fictif** et ne fait référence à aucune entreprise réelle
+- Ce projet **n'a aucun lien** avec la société **KIWEE.Care** ni avec ses produits, services ou technologies
+- Les données utilisées sont **générées aléatoirement** et ne contiennent aucune information réelle ou sensible
 
 ---
 
@@ -742,9 +740,9 @@ Une fois terminé, il s'arrête (exit code 0). Vous pouvez le supprimer : `docke
 
 ---
 
-## Démo rapide devant recruteur
+## Guide de démarrage rapide
 
-### Préparation (5 minutes avant)
+### Préparation (5 minutes)
 
 ```powershell
 # 1. Lancer tous les services
@@ -811,7 +809,7 @@ Points à mentionner :
 
 ---
 
-## FAQ / Points clés entretien
+## FAQ / Points clés techniques
 
 ### Architecture
 
@@ -890,7 +888,7 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 ## Contact
 
-**Projet de démonstration** pour entretiens techniques dans le domaine de l'ingénierie des données.
+**Projet de démonstration** de compétences en Data Engineering.
 
 Pour toute question : [darilgylls@gmail.com](darilgylls@gmail.com)
 
